@@ -25,33 +25,27 @@ export function RepositoryTable({ repositories }: RepositoryTableProps) {
   };
 
   const filteredAndSortedRepos = useMemo(() => {
-    let result = repositories.filter(
+    const result = repositories.filter(
       (repo) =>
         repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (repo.language && repo.language.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     result.sort((a, b) => {
-      let valA: any = a.stargazers_count;
-      let valB: any = b.stargazers_count;
+      const direction = sortOrder === 'asc' ? 1 : -1;
 
-      if (sortField === 'stars') {
-        valA = a.stargazers_count;
-        valB = b.stargazers_count;
-      } else if (sortField === 'forks') {
-        valA = a.forks_count;
-        valB = b.forks_count;
-      } else if (sortField === 'name') {
-        valA = a.name.toLowerCase();
-        valB = b.name.toLowerCase();
-      } else if (sortField === 'updated') {
-        valA = new Date(a.updated_at).getTime();
-        valB = new Date(b.updated_at).getTime();
+      switch (sortField) {
+        case 'stars':
+          return (a.stargazers_count - b.stargazers_count) * direction;
+        case 'forks':
+          return (a.forks_count - b.forks_count) * direction;
+        case 'name':
+          return a.name.localeCompare(b.name) * direction;
+        case 'updated':
+          return (new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()) * direction;
+        default:
+          return 0;
       }
-
-      if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
-      if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
     });
 
     return result;

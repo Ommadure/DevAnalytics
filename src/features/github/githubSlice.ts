@@ -38,13 +38,15 @@ export const fetchUserData = createAsyncThunk(
   'github/fetchUserData',
   async (username: string, { rejectWithValue }) => {
     try {
-      const response = await githubApi.get<UserData>(`/users/${username}`);
+      const safeUsername = encodeURIComponent(username.trim());
+      const response = await githubApi.get<UserData>(`/users/${safeUsername}`);
       return response.data;
-    } catch (error: any) {
-      if (error.response && error.response.status === 404) {
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
         return rejectWithValue('User not found');
       }
-      return rejectWithValue(error.message || 'Failed to fetch user data');
+      const message = axios.isAxiosError(error) ? error.message : 'Failed to fetch user data';
+      return rejectWithValue(message);
     }
   }
 );
@@ -55,10 +57,12 @@ export const fetchUserRepositories = createAsyncThunk(
   async (username: string, { rejectWithValue }) => {
     try {
       // For simplicity, fetch up to 100 repositories
-      const response = await githubApi.get<Repository[]>(`/users/${username}/repos?per_page=100&sort=updated`);
+      const safeUsername = encodeURIComponent(username.trim());
+      const response = await githubApi.get<Repository[]>(`/users/${safeUsername}/repos?per_page=100&sort=updated`);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch repositories');
+    } catch (error: unknown) {
+      const message = axios.isAxiosError(error) ? error.message : 'Failed to fetch repositories';
+      return rejectWithValue(message);
     }
   }
 );
