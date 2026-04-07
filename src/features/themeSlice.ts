@@ -1,11 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { safeLocalStorageGetItem, safeLocalStorageSetItem } from '../lib/storage';
 
 interface ThemeState {
   darkMode: boolean;
 }
 
 const initialState: ThemeState = {
-  darkMode: localStorage.getItem('darkMode') === 'true' || false,
+  darkMode: safeLocalStorageGetItem('darkMode') === 'true' || false,
 };
 
 const themeSlice = createSlice({
@@ -14,7 +15,7 @@ const themeSlice = createSlice({
   reducers: {
     toggleDarkMode: (state) => {
       state.darkMode = !state.darkMode;
-      localStorage.setItem('darkMode', state.darkMode.toString());
+      safeLocalStorageSetItem('darkMode', state.darkMode.toString());
       if (state.darkMode) {
         document.documentElement.classList.add('dark');
       } else {
@@ -23,7 +24,7 @@ const themeSlice = createSlice({
     },
     setDarkMode: (state, action) => {
       state.darkMode = action.payload;
-      localStorage.setItem('darkMode', state.darkMode.toString());
+      safeLocalStorageSetItem('darkMode', state.darkMode.toString());
       if (state.darkMode) {
         document.documentElement.classList.add('dark');
       } else {
